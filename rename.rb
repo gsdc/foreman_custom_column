@@ -29,38 +29,43 @@ if snake == camel
   exit 1
 end
 
-old_dirs = []
 Find.find('.') do |path|
   next unless File.file?(path)
   next if path =~ /\.git/
   next if path == './rename.rb'
 
   # Change content on all files
-  tmp_file = "#{path}.tmp"
-  system(%(sed 's/foreman_plugin_template/#{snake}/g' #{path} > #{tmp_file}))
-  system(%(sed 's/ForemanPluginTemplate/#{camel}/g' #{tmp_file} > #{path}))
-  system(%(sed 's/foremanPluginTemplate/#{camel_lower}/g' #{tmp_file} > #{path}))
-  system(%(rm #{tmp_file}))
+  tmp_file_1 = "#{path}.1.tmp"
+  tmp_file_2 = "#{path}.2.tmp"
+  system(%(sed 's/foreman_plugin_template/#{snake}/g' #{path} > #{tmp_file_1}))
+  system(%(sed 's/ForemanPluginTemplate/#{camel}/g' #{tmp_file_1} > #{tmp_file_2}))
+  system(%(sed 's/foremanPluginTemplate/#{camel_lower}/g' #{tmp_file_2} > #{path}))
+  system(%(rm #{tmp_file_1}))
+  system(%(rm #{tmp_file_2}))
 end
 
+old_dirs = []
 Find.find('.') do |path|
-  # Change all the paths to the new snake_case name
-  if path =~ /foreman_plugin_template/i
+  next unless File.directory?(path)
+  next if path =~ /\.git/
+
+  if path =~ /foreman_plugin_template$/i
     new = path.gsub('foreman_plugin_template', snake)
-    # Recursively copy the directory and store the original for deletion
-    # Check for $ because we don't need to copy template/hosts for example
-    if File.directory?(path) && path =~ /foreman_plugin_template$/i
-      FileUtils.cp_r(path, new)
-      old_dirs << path
-    else
-      # gsub replaces all instances, so it will work on the new directories
-      FileUtils.mv(path, new)
-    end
+    FileUtils.cp_r(path, new)
+    old_dirs << path
   end
 end
-
-# Clean up
 FileUtils.rm_rf(old_dirs)
+
+Find.find('.') do |path|
+  next unless File.file?(path)
+  next if path =~ /\.git/
+
+  if path =~ /foreman_plugin_template/i
+    new = path.gsub('foreman_plugin_template', snake)
+    FileUtils.mv(path, new)
+  end
+end
 
 FileUtils.mv('README.plugin.md', 'README.md')
 
