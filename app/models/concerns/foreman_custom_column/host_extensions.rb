@@ -1,4 +1,4 @@
-module ForemanPluginTemplate
+module ForemanCustomColumn
   module HostExtensions
     extend ActiveSupport::Concern
 

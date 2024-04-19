@@ -1,2 +1,2 @@
-# Matches foreman_plugin_template.gemspec
-_('TODO: Description of ForemanPluginTemplate.')
+# Matches foreman_custom_column.gemspec
+_('TODO: Description of ForemanCustomColumn.')
